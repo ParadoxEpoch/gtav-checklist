@@ -1,0 +1,389 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/css/iziModal.min.css"/>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://unpkg.com/@panzoom/panzoom@4.4.4/dist/panzoom.min.js"></script>
+</head>
+
+<body>
+
+    <div id="progress">Loading...</div>
+    <div id="notifications"></div>
+
+    <div id="editor">
+        <div>
+            <h4>Map Editor</h4>
+        </div>
+        <div>
+            <input type="text" id="editorInputName" placeholder="Map Marker Name" value="Part #X (xyz)" style="width: 100%">
+        </div>
+        <div>
+            <input type="text" id="editorInputCat" placeholder="Map Marker Cat" value="spaceship">
+            <input type="text" id="editorInputId" placeholder="Map Marker ID" value="ship00">
+        </div>
+        <div>
+            <input type="number" id="editorInputX" value="4096" step="2">
+            <input type="number" id="editorInputY" value="4096" step="2">
+        </div>
+        <div>
+            <input type="range" min="0" max="8192" value="4096" step="1" class="slider" id="editorRangeX" style="width: 48%">
+            <input type="range" min="0" max="8192" value="4096" step="1" class="slider" id="editorRangeY" style="width: 48%">
+        </div>
+        <div>
+            <button onclick="createSvgObject()" style="width: 100%">Create SVG Object</button>
+        </div>
+        <div>
+            <textarea id="svgObjectOutput" cols="44" rows="5" readonly></textarea>
+        </div>
+    </div>
+
+    <div id="perks" style="display: none;">
+        <div>
+            <h4>Unlockable Perks</h4>
+            <div data-requires="vehicle3"><i class="fas fa-check-circle"></i> 150 Health</div> <!-- Paramedic -->
+            <div data-requires="vehicle5"><i class="fas fa-times-circle"></i> 150 Armor</div> <!-- Vigilante -->
+            <div data-requires="vehicle4"><i class="fas fa-times-circle"></i> Fireproof</div> <!-- Firefighter -->
+            <div><i class="fas fa-times-circle"></i> Infinite Sprint</div> <!-- Burglary: Make $10k/Approx 25 Items -->
+            <div data-requires="vehicle1"><i class="fas fa-times-circle"></i> Taxi Boost Jump</div> <!-- Taxi Driver -->
+            <div data-requires="vehicle1"><i class="fas fa-times-circle"></i> Taxis have Nitro</div> <!-- Taxi Driver -->
+            <br>
+            <h4>100% Completion Unlocks</h4> <!-- These perks are awarded for reaching 100% completion -->
+            <div><i class="fas fa-times-circle"></i> Infinite Ammo</div>
+            <div><i class="fas fa-times-circle"></i> 2x Vehicle Durability</div>
+            <div><i class="fas fa-times-circle"></i> Hydra Spawn on Grove St</div>
+            <div><i class="fas fa-times-circle"></i> Rhino Spawn on Grove St</div>
+        </div>
+        <div>
+            <h4>Spawnable Unlocks</h4> <!-- All Weapons & Body Armor spawn at Ocean View Hotel, Vercetti Estate & Hyman Condo -->
+            <div><i class="fas fa-times-circle"></i> </div> <!-- 10 Packages -->
+            <div><i class="fas fa-times-circle"></i> </div> <!-- 20 Packages -->
+            <div><i class="fas fa-times-circle"></i> </div> <!-- 30 Packages -->
+            <div><i class="fas fa-times-circle"></i> </div> <!-- 40 Packages -->
+            <div><i class="fas fa-times-circle"></i> </div> <!-- 50 Packages -->
+            <div><i class="fas fa-times-circle"></i> </div> <!-- 60 Packages -->
+            <br>
+            <div data-requires="import1"><i class="fas fa-times-circle"></i> </div> <!-- Import List 1, Spawns at Sunshine Autos -->
+            <div data-requires="import2"><i class="fas fa-times-circle"></i> </div> <!-- Import List 2, Spawns at Sunshine Autos -->
+            <div data-requires="import3"><i class="fas fa-times-circle"></i> </div> <!-- Import List 3, Spawns at Sunshine Autos -->
+            <div data-requires="import4"><i class="fas fa-times-circle"></i> </div> <!-- Import List 4, Spawns at Sunshine Autos -->
+            <div data-requires="arena3"><i class="fas fa-times-circle"></i> </div> <!-- Spawns outside Hyman Memorial Stadium after completing Bloodring -->
+            <div data-requires="cab3"><i class="fas fa-times-circle"></i> </div> <!-- Spawns at Kaufman Cabs after completing associated asset missions -->
+            <div data-requires="film4"><i class="fas fa-times-circle"></i> </div> <!-- ! CONFIRM THIS: Spawns behind the Film Studio after completing associated asset missions -->
+        </div>
+        <div>
+            <h4>Unlockable Outfits</h4>
+            <div data-requires="malibu4"><i class="fas fa-times-circle"></i> </div> <!-- Complete "The Job", Spawns at Malibu Property -->
+            <div data-requires="juan1"><i class="fas fa-times-circle"></i> </div> <!-- Complete "Treacherous Swine", Spawns at Gash in North Point Mall -->
+            <div data-requires="tommy3"><i class="fas fa-times-circle"></i> </div> <!-- Complete "Copland", Spawns at Police Station -->
+            <div data-requires="avery1"><i class="fas fa-times-circle"></i> </div> <!-- Complete "Four Iron", Spawns at Leaf Links Golf Course -->
+            <div data-requires="avery3"><i class="fas fa-times-circle"></i> </div> <!-- Complete "Two Bit Hit", Spawns at Little Havana Streetware store -->
+        </div>
+    </div>
+
+    <div id="map-container">
+        <svg id="map" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 8192 8192"
+            preserveAspectRatio="xMinYMin meet">
+            <image width="8192" height="8192" xlink:href="images/map-lg.png"></image>
+            <a xlink:href="#">
+                <circle cx="4086" cy="6772" r="20" stroke-width="10" cat="spaceship" id="ship01" tooltip="Part #1 (Los Santos Gas & Power Facility)" stroke="white" fill="red" />
+                <circle cx="3140" cy="7222" r="20" stroke-width="10" cat="spaceship" id="ship02" tooltip="Part #2 (Los Santos Airport - South)" stroke="white" fill="red" />
+                <circle cx="4264" cy="7082" r="20" stroke-width="10" cat="spaceship" id="ship03" tooltip="Part #3 (Elysian Island - South Dock)" stroke="white" fill="red" />
+                <circle cx="4846" cy="6807" r="20" stroke-width="10" cat="spaceship" id="ship04" tooltip="Part #4 (Murrieta Oil Field - Oceanside)" stroke="white" fill="red" />
+                <circle cx="4572" cy="6672" r="20" stroke-width="10" cat="spaceship" id="ship05" tooltip="Part #5 (El Burro Heights - South)" stroke="white" fill="red" />
+                <circle cx="4102" cy="6388" r="20" stroke-width="10" cat="spaceship" id="ship06" tooltip="Part #6 (Rancho Towers)" stroke="white" fill="red" />
+                <circle cx="4930" cy="6074" r="20" stroke-width="10" cat="spaceship" id="ship07" tooltip="Part #7 (Murrieta Oil Field - North)" stroke="white" fill="red" />
+                <circle cx="4054" cy="5975" r="20" stroke-width="10" cat="spaceship" id="ship08" tooltip="Part #8 (Davis Medical Center - Roof)" stroke="white" fill="red" />
+                <circle cx="3888" cy="5834" r="20" stroke-width="10" cat="spaceship" id="ship09" tooltip="Part #9 (Strawberry - Freeway)" stroke="white" fill="red" />
+                <circle cx="3334" cy="5804" r="20" stroke-width="10" cat="spaceship" id="ship10" tooltip="Part #10 (Vespucci Canals - Billboard)" stroke="white" fill="red" />
+                                
+                <circle cx="4096" cy="4096" r="20" stroke-width="10" cat="other" id="editormark" tooltip="Map Editor Marker" stroke="white" fill="blue" />
+            </a>
+        </svg>
+    </div>
+
+    <div id="sidebar">
+
+        <div id="header">
+
+            <!-- GTA V Logo -->
+            <div>
+                <img src="images/logo.png" style="height: 250px; margin-top: 10px">
+            </div>
+    
+            <div id="intro">
+                <div>100% Checklist</div>
+                <div>by <a href="https://twitter.com/ParadoxEpoch" target="_blank">@ParadoxEpoch</a></div>
+                <br>
+                <div id="links">
+                    <a href="https://nebu.dev" target="_blank"><i class="fas fa-globe-americas"></i></a>
+                    <span>&#183;</span>
+                    <a href="https://twitter.com/ParadoxEpoch" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <span>&#183;</span>
+                    <a href="https://github.com/maega" target="_blank"><i class="fab fa-github"></i></a>
+                    <!-- <span>&#183;</span>
+                    <a href="#" target="_blank"><i class="fab fa-bitcoin"></i></a> -->
+                </div>
+            </div>
+    
+        </div>
+
+        <div id="mapItems">
+            
+            <div class="category">
+                <hr>
+                <h2>Spaceship Parts</h2>
+                <ul category="spaceship"></ul>
+                <hr>
+                <h2>Other</h2>
+                <ul category="other"></ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" data-modal="test_template">
+
+        <h3><i class="fas fa-file-alt"></i> Notes</h3>
+        <p>Nothing to report</p>
+
+        <h3><i class="fas fa-trophy"></i> Missable Trophy</h3>
+        <p>Nothing to report</p>
+
+        <h3><i class="fas fa-bomb"></i> Exploits</h3>
+        <p>Nothing to report</p>
+        
+        <h3><i class="fas fa-bug"></i> Bugs</h3>
+        <p>Nothing to report</p>
+
+    </div>
+    <!-- End Modals -->
+
+    <div id="tooltip" class="is-hidden"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/js/iziModal.min.js"></script>
+    <script>
+        function initItems() {
+            
+            // Initialise Modals
+            $('.modal').iziModal({
+                padding: '10px 0 0 0',
+                width: '700px',
+                radius: '5px',
+                subtitle: 'Mission Strategy',
+                headerColor: '#c5b99f'
+            });
+
+            // Add a list item for each marker on the map
+            $('#map circle').each((index, item) => {
+                const category = $(item).attr('cat');
+                const title = $(item).attr('tooltip');
+                const id = $(item).attr('id');
+                $(`#mapItems [category="${category}"]`).append(`<li><input type="checkbox" refid="${id}"><span refid="${id}">${title}</span></li>`);
+            });
+
+            // Add event handler for modals
+            $('input[type="checkbox"]').each((index, elem) => {
+                // If item has modal
+                const hasModal = !!$(`[data-modal="${$(elem).attr('id')}"]`).length;
+                if (hasModal) {
+                    console.log(`Mission ${$(elem).attr('id')} has a modal linked to it!`);
+                    $(elem).next().addClass('modal-trigger');
+                }
+            });
+
+            const items = JSON.parse(localStorage.getItem('checkedItemsGTAV'));
+            if (!items) return saveItems();
+            items.forEach((val, index) => $('input[type="checkbox"]')[index].checked = val);
+
+            saveItems();
+        }
+        function saveItems() {
+            const itemStats = [];
+            
+            let numSelected = 0;
+            const numTotal = $('input[type="checkbox"]').length;
+
+            const justUnlocked = [];
+
+            $('input[type="checkbox"]').each((index, elem) => {
+
+                // If item has requirements
+                if ($(elem).data('requires')) {
+                    const requirements = $(elem).data('requires').split(',');
+                    let meetsRequirements = true;
+                    const unmetRequirements = [];
+                    requirements.forEach(req => {
+                        if (!$(`#${req}`).is(':checked')) {
+                            meetsRequirements = false;
+                            unmetRequirements.push($(`#${req}`).next().attr('altname') || $(`#${req}`).next().text());
+                        }
+                    });
+
+                    const input = $(elem);
+                    const span = $(elem).next();
+                    if (unmetRequirements.length) {
+                        span.attr('tooltip', 'Unlocked by: ' + unmetRequirements.join(', '));
+                        input.attr('disabled', true);
+                    } else {
+                        if (input.attr('disabled')) justUnlocked.push(span.attr('altname') || span.text());
+                        span.removeAttr('tooltip');
+                        input.attr('disabled', null);
+                        if (span.attr('tooltip-orig')) span.attr('tooltip', span.attr('tooltip-orig'));
+                    }
+                    
+                }
+
+                const refid = $(elem).attr('refid');
+                itemStats.push(elem.checked);
+                if (elem.checked) {
+                    numSelected++;
+                    $(`#${refid}`).attr('fill', 'green');
+                } else if (refid !== 'editormark') {
+                    $(`#${refid}`).attr('fill', 'red');
+                }
+            });
+            localStorage.setItem('checkedItemsGTAV', JSON.stringify(itemStats));
+
+            const completedPct = (numSelected/numTotal) * 100;
+            $('#progress').text(`${numSelected}/${numTotal} (${completedPct.toFixed(2)}%) Completed`);
+
+            if (justUnlocked.length) sendToast(`Unlocked Missions:<br>${justUnlocked.join('<br>')}`, false, true);
+
+            playAudio('sounds/vc-notification.mp3');
+        }
+
+        const mapElem = document.querySelector('#map');
+        const panzoom = Panzoom(mapElem, { contain: 'outside', startScale: 1.0, maxScale: 30, minScale: 0.5 });
+        mapElem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+
+        function setMarkerSize(radius, border) {
+            $('#map circle').each((index, marker) => {
+                $(marker).attr({
+                    "r": radius,
+                    "stroke-width": border
+                });
+            })
+        }
+
+        mapElem.addEventListener('panzoomzoom', (event) => {
+            const scale = event.detail.scale;
+
+            if (scale >= 25) { setMarkerSize('2', '0.75') } else
+            if (scale >= 15) { setMarkerSize('3', '1') } else
+            if (scale >= 10) { setMarkerSize('5', '1.5') } else
+            if (scale >= 6.5) { setMarkerSize('6', '2') } else
+            if (scale >= 4) { setMarkerSize('10', '3') } else
+            if (scale >= 3) { setMarkerSize('15', '5') } else
+            if (scale >= 2) { setMarkerSize('20', '7') } else
+            setMarkerSize('30', '10')
+        });
+
+        /* $("#map").iviewer({
+            src: "images/map.png"
+        });
+
+        $('#map').bind('ivieweronfinishload', function(ev, src) {
+            $('#map > img').attr('usemap', '#map_spaceship');
+        });
+
+        $('#map').bind('ivieweronafterzoom', function(ev, src) {
+            $('map[name="map_spaceship"] > area').each((index, area) => {
+                const title = $(area).attr('title');
+                const coords = $(area).attr('origcoords');
+                console.log(`'${title}' coords: ${coords}`);
+                const splitCoords = coords.split(',');
+                splitCoords.forEach((coord, ind) => {
+                    splitCoords[ind] = Math.round((coord * src)/100);
+                })
+                const newCoords = splitCoords.join(',');
+                console.log(`'${title}' NEW coords: ${newCoords}`);
+                $(area).attr('coords', newCoords);
+            })
+        }) */
+
+        $(document).mousemove(function(e) {
+            const tooltip = $('#tooltip');
+            if (!tooltip.hasClass('is-hidden')) {
+                const bottomYPos = e.clientY + tooltip.height();
+                const overflowPixels = bottomYPos - window.innerHeight + 30; // Add an extra 30 pixels for leeway
+                bottomYPos > window.innerHeight
+                    ? tooltip.css({top: e.pageY - overflowPixels, left: e.pageX})
+                    : tooltip.css({top: e.pageY, left: e.pageX});
+            } else {
+                tooltip.css({top: e.pageY, left: e.pageX});
+            }
+        });
+
+        $(document).on('mouseenter', '[tooltip]', function() {
+            $('#tooltip').removeClass('is-hidden');
+            $('#tooltip').html($(this).attr('tooltip'));
+        });
+
+        $(document).on('mouseleave', '[tooltip]', function() {
+            $('#tooltip').addClass('is-hidden');
+        });
+
+        $(document).on('click', '.modal-trigger', function() {
+            const modalId = $(this).prev().attr('id');
+            const modal = $(`[data-modal="${modalId}"]`);
+            modal.iziModal('setTitle', $(this).text());
+            modal.iziModal('open');
+        })
+
+        // Instantiate audio object globally so that we only have one sound playing at a time
+        const audio = new Audio();
+        function playAudio(url) {
+            return new Promise(function(resolve, reject) {
+                audio.preload = "auto";
+                audio.autoplay = true;
+                audio.onerror = reject;
+                audio.onended = resolve;
+                audio.src = url
+            });
+        }
+
+        function sendToast(text, playSound = true, clearAll = false) {
+            const rand = Math.floor(Math.random() * 100000);
+            if (clearAll) $('#notifications').empty();
+            $('#notifications').append(`<div id="notif_${rand}">${text}</div>`);
+            if (playSound) playAudio('sounds/vc-notification.mp3');
+            setTimeout(() => $(`#notif_${rand}`).remove(), 4000);
+            return 'notif_' + rand;
+        }
+
+        // For development only, init map editor
+        $('#editorRangeX, #editorInputX').on('input', function() {
+            $('#editormark').attr('cx', this.value);
+            $('#editorRangeX, #editorInputX').val(this.value);
+        });
+        $('#editorRangeY, #editorInputY').on('input', function() {
+            $('#editormark').attr('cy', this.value);
+            $('#editorRangeY, #editorInputY').val(this.value);
+        });
+        function createSvgObject() {
+            const x = $('#editormark').attr('cx');
+            const y = $('#editormark').attr('cy');
+            const name = $('#editorInputName').val().replace('"', '\'');
+            const id = $('#editorInputId').val();
+            const cat = $('#editorInputCat').val().replace('"', '\'');
+            const outputElem = $('#svgObjectOutput');
+            outputElem.val(outputElem.val() + `<circle cx="${x}" cy="${y}" r="20" stroke-width="10" cat="${cat}" id="${id}" tooltip="${name}" stroke="white" fill="red" />\n`);
+            $('#map > a').append(`<circle cx="${x}" cy="${y}" r="20" stroke-width="10" cat="${cat}" id="${id}" tooltip="${name}" stroke="white" fill="yellow" />\n`);
+            $(`#mapItems [category="${cat}"]`).append(`<li><input type="checkbox" refid="${id}"><span style="color: orange" refid="${id}">${name}</span></li>`);
+        }
+
+        // Init items
+        $(document).on('click', 'input[type="checkbox"]', () => saveItems());
+        $(document).ready(() => initItems());
+
+    </script>
+
+</body>
+
+</html>
