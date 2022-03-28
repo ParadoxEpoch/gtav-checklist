@@ -14,7 +14,7 @@ This project is different from my previous GTA checklists in that it features an
 Clone or download this repo and run _index.html_ directly or host it from any web server. It's as easy as that.
 
 ```bash
-git clone https://github.com/Maega/sanandreas-checklist
+git clone https://github.com/Maega/gtav-checklist
 ```
 
 ## :checkered_flag: Progress
